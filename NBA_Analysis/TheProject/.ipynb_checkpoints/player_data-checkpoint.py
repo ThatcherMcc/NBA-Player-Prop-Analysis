@@ -1,9 +1,14 @@
+import time
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 from io import StringIO
 
-def get_player_gamelog(full_name: str, year: int):
+class DataNotFoundError(Exception):
+    "custom exception for name data"
+    pass
+
+def get_player_gamelog(full_name: str, year: int = 2025, url_start: str = 'https://www.basketball-reference.com/players/j/{name}01/gamelog/{logYear}'):
     # get full name from input
     full_name = full_name.strip()
     # split the name into first name last name
@@ -23,16 +28,19 @@ def get_player_gamelog(full_name: str, year: int):
     try: 
         response = requests.get(url)
         response.raise_for_status()
+
+        file_path = f"Data/GameLogs/{player_name}{year}GameLog.html"
+        with open(file_path, "w+", encoding="utf-8") as f:
+            f.write(response.text)
+
     except requests.exceptions.Timeout as e:
         print("Request timed out:", e)
     except requests.exceptions.RequestException as e:
         print("An error occurred:", e)
-    # to write a file for each 'x'
-    file_path = f"GameLogs/{player_name}{year}GameLog.html"
-    with open(file_path, "w+", encoding="utf-8") as f:
-        f.write(response.text)
     
-    with open(f"GameLogs/{player_name}{year}GameLog.html", encoding="utf-8") as f:
+    time.sleep(4)
+    
+    with open(f"Data/GameLogs/{player_name}{year}GameLog.html", encoding="utf-8") as f:
         page = f.read()
         soup = BeautifulSoup(page, "html.parser")
         stats_table = soup.find(id="pgl_basic")
