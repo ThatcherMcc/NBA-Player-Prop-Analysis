@@ -8,7 +8,7 @@ def graph_dataframe(df: pd.DataFrame, player_name: str, prop_line: float, stat: 
     df = df.reset_index(drop=True)
     
     # drop stats that are unused in props
-    df = df.drop(columns = ['Location','Tm','WLSpread','GS','MP','PF','GmSc', '+/-','FT%','3P%','FG%','Age','G'])
+    df = df.drop(columns = ['FT%','3P%','FG%'])
     
     # add columns
     df[['PTS', 'TRB', 'AST', 'ORB', 'DRB', 'STL', 'BLK', 'TOV', 'FT', '3P', 'FG', 'FGA', '3PA']] = df[['PTS', 'TRB', 'AST', 'ORB', 'DRB', 'STL', 'BLK', 'TOV', 'FT', '3P', 'FG', 'FGA', '3PA']].apply(pd.to_numeric, errors='coerce')

@@ -22,7 +22,10 @@ def clean_gamelog(df: pd.DataFrame) -> pd.DataFrame:
     df.fillna({"G":"DNP"}, inplace=True) # fill null Game played values with "DNP"
     df.fillna({'Location':'Home'}, inplace=True) # fill null Locations with "Home"
     df.replace({'@': 'Away'}, inplace=True) # replaces "@" signs with the respective "Away"
-
+    df = df[df['G'] != 'DNP']
+    df = df.reset_index(drop=True)
+    df = df.drop(columns = ['Tm','WLSpread','GS','MP','PF','GmSc', '+/-','Age','G'])
+     
     return df
     
     # drop null rows for subset df. possibly used for a df with only games they played
