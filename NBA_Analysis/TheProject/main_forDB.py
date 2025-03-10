@@ -4,8 +4,7 @@ from utils import create_gamelogs_directory
 import pandas as pd
 
 def main():
-    name = input("Name: ")
-    #pd.read_csv("../Csv_Data/2025Player_Names.csv", encoding="utf-8")
+    name_DF = pd.read_csv("../Csv_Data/2025Player_Names.csv", encoding="utf-8")
     create_gamelogs_directory()
 
     all_cleaned_logs = []
