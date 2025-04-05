@@ -1,7 +1,7 @@
-from player_data import get_player_gamelog, DataNotFoundError
-from data_processing import clean_gamelog
+from get_player_data import get_player_gamelog, DataNotFoundError
+from OUTDATED.data_processing import clean_gamelog
 from utils import create_gamelogs_directory
-from graphing_df import graph_dataframe
+from graphing_dataframe import graph_dataframe
 import database_script as dbs
 import pandas as pd
 

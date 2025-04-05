@@ -1,3 +1,9 @@
+"""
+
+This script will be used as a database upkeep in the future.
+
+"""
+
 import sqlite3
 import pandas as pd
 from datetime import datetime, date
