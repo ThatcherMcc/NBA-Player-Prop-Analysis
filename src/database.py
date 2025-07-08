@@ -1,20 +1,85 @@
 """
 
 This script will be used as a database upkeep in the future.
+CURRENTLY NOT USABLE
 
 """
 
-import sqlite3
-import pandas as pd
-from datetime import datetime, date
 from typing import Optional
+from datetime import datetime, date
+import sqlite3
+from data_acquisition import get_player_gamelog, DataNotFoundError
+from data_processing import clean_gamelog
+from utils import create_gamelogs_directory
+from analysis import graph_dataframe
+import pandas as pd
+
+
+def main():
+    # name_DF = pd.read_csv("../Csv_Data/2025Player_Names.csv", encoding="utf-8")
+    create_gamelogs_directory()
+    last_name_used = ""
+
+    while True:
+        try:
+            full_name = input(
+                "\nEnter player's full name (e.g. 'Lebron James') or 'list' or 'end': ")
+
+            if full_name.lower() == "end":
+                print("Ending Now")
+                exit()
+            if full_name.lower() == "fetch":
+                print("Fetching")
+                graph_dataframe(dbs.fetch_player_data(
+                    last_name_used), last_name_used, 20)
+                continue
+
+            year = 2025
+            name = full_name
+            print("GET DF")
+            # attempt to get dataframe
+            gamelog_df = get_player_gamelog(name, year)
+            if (gamelog_df is None) or (gamelog_df.empty):
+                print(f"No data found for {name}, skipping...")
+                continue
+
+            cleaned_df = clean_gamelog(gamelog_df)
+            if (cleaned_df is None) or (cleaned_df.empty):
+                print(f"Couldn't cleane data for {name}, skipping...")
+                continue
+            # write filepath
+            # file_path = f"Data/DataFrames/{full_name.upper()}DataFrame.html"
+            # log.to_html(file_path, index=False, encoding="utf-8")
+
+            # add to db
+            dbs.save_to_db(cleaned_df, name, year)
+            last_name_used = name
+            # if successful, break the loop
+            continue
+        except ValueError as e:
+            print(
+                "Name isn't spelled correctly. Make sure to add a space and '-' when needed.")
+            continue
+        except DataNotFoundError as e:
+            print("Data can't be found for the player. Maybe he didn't play in this year or maybe the name is wrong?")
+            continue
+        except Exception as e:
+            print(f"an error has occured: {e}")
+            continue
+
+
+if __name__ == "__main__":
+    main()
+
 
 DB_NAME = 'player_data.db'
 DB_PATH = "Data/DATABASE/" + DB_NAME
 
+
 def connect_db():
     conn = sqlite3.connect(DB_PATH)
     return conn
+
 
 def setup_database():
     conn = connect_db()
@@ -57,8 +122,10 @@ def setup_database():
         )
         """)
 
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_player_stats_player_id ON player_stats(PLAYER_ID)")
-        conn.execute("CREATE INDEX IF NOT EXISTS idx_player_stats_game_date ON player_stats(DATE)")
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_player_stats_player_id ON player_stats(PLAYER_ID)")
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_player_stats_game_date ON player_stats(DATE)")
 
         conn.commit()
     except Exception as e:
@@ -93,16 +160,17 @@ def save_to_db(df: pd.DataFrame, player_name: str, year: int = 2025) -> bool:
             (player_name, today)
         )
 
-        cursor.execute("SELECT ID FROM PLAYER_REGISTRY WHERE PLAYER_NAME = ?", (player_name,))
+        cursor.execute(
+            "SELECT ID FROM PLAYER_REGISTRY WHERE PLAYER_NAME = ?", (player_name,))
         player_id = cursor.fetchone()[0]
-
 
         cursor.execute(
             "UPDATE PLAYER_REGISTRY SET LAST_UPDATED = ? WHERE ID = ?",
             (today, player_id)
         )
 
-        cursor.execute("DELETE FROM PLAYER_STATS WHERE PLAYER_ID = ?", (player_id,))
+        cursor.execute(
+            "DELETE FROM PLAYER_STATS WHERE PLAYER_ID = ?", (player_id,))
 
         records = []
         for idx, row in df.iterrows():
@@ -145,7 +213,8 @@ def save_to_db(df: pd.DataFrame, player_name: str, year: int = 2025) -> bool:
         """, records)
 
         conn.commit()
-        print(f"Updated {player_name}'s {year} season data in database ({len(records)} games)")
+        print(
+            f"Updated {player_name}'s {year} season data in database ({len(records)} games)")
         return True
     except Exception as e:
         print(f"Error saving data for {player_name} ({year}): {e}")
@@ -155,7 +224,7 @@ def save_to_db(df: pd.DataFrame, player_name: str, year: int = 2025) -> bool:
     finally:
         if conn:
             conn.close()
-            
+
 
 def fetch_player_data(player_name, year: int = 2025) -> Optional[pd.DataFrame]:
     """Fetches player data from the database as a DataFrame."""
@@ -192,7 +261,8 @@ def fetch_player_data(player_name, year: int = 2025) -> Optional[pd.DataFrame]:
         """
 
         cursor = conn.cursor()
-        cursor.execute("SELECT ID FROM PLAYER_REGISTRY WHERE PLAYER_NAME = ?", (player_name,))
+        cursor.execute(
+            "SELECT ID FROM PLAYER_REGISTRY WHERE PLAYER_NAME = ?", (player_name,))
         player_result = cursor.fetchone()
 
         if not player_result:
@@ -200,7 +270,8 @@ def fetch_player_data(player_name, year: int = 2025) -> Optional[pd.DataFrame]:
             return None
 
         player_id = player_result[0]
-        cursor.execute("SELECT COUNT(*) FROM PLAYER_STATS WHERE PLAYER_ID = ?", (player_id,))
+        cursor.execute(
+            "SELECT COUNT(*) FROM PLAYER_STATS WHERE PLAYER_ID = ?", (player_id,))
         count = cursor.fetchone()[0]
 
         if count == 0:
@@ -222,4 +293,3 @@ def fetch_player_data(player_name, year: int = 2025) -> Optional[pd.DataFrame]:
     finally:
         if conn:
             conn.close()
-    
