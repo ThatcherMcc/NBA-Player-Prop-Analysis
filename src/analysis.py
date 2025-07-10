@@ -63,7 +63,7 @@ def graph_dataframe(df: pd.DataFrame, player_name: str, prop_line: float, stat: 
     print(f"Push Rate: {push_percent:.2f}% ({pushes}/{last_games_count})")
 
     # graph
-    bars = plt.bar(df_last['Date'].dt.strftime('%Y-%m-%d') + ' ' + df_last['Opponents'],
+    bars = plt.bar(df_last['Date'].dt.strftime('%Y-%m-%d') + ' ' + df_last['Opponent'],
                    df_last[stat], color=colors)
     for bar in bars:
         yval = bar.get_height()
