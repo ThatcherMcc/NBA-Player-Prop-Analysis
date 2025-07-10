@@ -1,7 +1,8 @@
 from data_acquisition import get_player_gamelog, DataNotFoundError
 from data_processing import clean_gamelog
-from utils import create_gamelogs_directory
+from utils import create_gamelogs_directory, get_root_path
 from analysis import graph_dataframe
+import os
 
 
 def main():
@@ -59,7 +60,9 @@ def main():
             print("Cleaning process returned a null DataFrame.")
             exit()
 
-        file_path = f"data/dataframes/{full_name.replace(' ', '_')}_2025_dataframe.html"
+        root_path = get_root_path()
+        file_path = os.path.join(root_path, 'data', 'dataframes',
+                                 f'{full_name.replace(' ', '_')}_2025_dataframe.html')
         # saves clean dataframe
         cleaned_df.to_html(file_path, index=False, encoding="utf-8")
 
