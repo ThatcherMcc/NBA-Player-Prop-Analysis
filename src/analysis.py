@@ -5,7 +5,10 @@ Generates a simple bar plot from the given inputs
 """
 
 import pandas as pd
-import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.io as pio
+import webbrowser
+from utils import Utils
 
 
 def graph_dataframe(df: pd.DataFrame, player_name: str, prop_line: float, stat: str = 'PTS', last_games_count: int = 10,  year: int = 2025):
@@ -23,69 +26,84 @@ def graph_dataframe(df: pd.DataFrame, player_name: str, prop_line: float, stat: 
     Returns:
         matplotlib.pyplot: A visual of the input information in bar plot format
     """
-    df = df.fillna(0)  # fill nulls with 0
+    df_last = df.copy()
+    df_last = df_last.tail(last_games_count)
+    df_last[stat] = pd.to_numeric(df_last[stat], errors='coerce').fillna(0)
 
-    # drop stats that are unused in props
-    df = df.drop(columns=['FT%', '3P%', 'FG%'])
+    df_last['Game_Label'] = df_last['Opponent'] + '<br>' + \
+        df_last['Date'].dt.strftime('%m/%d/%y')  # <br> for newline in Plotly
+    df_last['Outcome'] = ['Over' if s > prop_line else 'Under' if s <
+                          prop_line else 'Push' for s in df_last[stat]]
 
-    # change whole number columns to numeric
-    columns_to_numeric = ['PTS', 'TRB', 'AST', 'ORB', 'DRB',
-                          'STL', 'BLK', 'TOV', 'FT', '3P', 'FG', 'FGA', '3PA']
+    # Define colors for Plotly
+    color_map = {
+        'Over': 'forestgreen',
+        'Under': 'firebrick',
+        'Push': 'grey'
+    }
 
-    # Iterate through the columns and apply pd.to_numeric
-    for col in columns_to_numeric:
-        # Use errors='coerce' to turn unconvertible values into NaN
-        df[col] = pd.to_numeric(df[col], errors='coerce')
+    # Plotting with Plotly Express
+    fig = px.bar(
+        df_last,
+        x='Game_Label',
+        y=stat,
+        color='Outcome',  # Color bars based on 'Outcome' column
+        color_discrete_map=color_map,  # Map outcomes to specific colors
+        title=f'<b>{player_name}</b> <br>Last {last_games_count} Games : {prop_line} {stat}',
+        labels={stat: f'{stat} Value', 'Game_Label': 'Opponent & Game Date'},
+        text=stat  # Display numerical value on top of bars
+    )
 
-    df['PRA'] = df[['PTS', 'TRB', 'AST']].sum(
-        axis=1)  # points + rebounds + assists
-    df['PR'] = df[['PTS', 'TRB']].sum(axis=1)  # points + rebounds
-    df['PA'] = df[['PTS', 'AST']].sum(axis=1)  # points + assists
-    df['RA'] = df[['TRB', 'AST']].sum(axis=1)  # rebounds + assists
+    # Add the prop line using graph_objects (go)
+    fig.add_hline(
+        y=prop_line,
+        line_dash="dash",
+        line_color="navy",
+        annotation_text=f"Prop Line: {prop_line}",
+        annotation_position="top right"
+    )
 
-    df_last = df.tail(last_games_count)  # last 'x' amount of games
-    # coloring the bars based on prop_line
-    colors = ["green" if used_stat > prop_line else "red" if used_stat <
-              prop_line else "grey" for used_stat in df_last[stat]]
+    # Further customization
+    fig.update_layout(
+        xaxis_title_font_size=12,
+        yaxis_title_font_size=12,
+        title_font_size=18,
+        hovermode="x unified",  # Shows tooltip for all traces at a specific X-position
+        bargap=0.2,  # Adjust gap between bars
 
-    # Count hits, pushes, and misses
-    hits = sum(df_last[stat] > prop_line)
-    pushes = sum(df_last[stat] == prop_line)
-    misses = last_games_count - hits - pushes
+        # Move legend outside
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
+    )
 
-    # Calculate percentages
-    hit_percent = (hits / last_games_count) * 100
-    push_percent = (pushes / last_games_count) * 100
-    miss_percent = (misses / last_games_count) * 100  # optional
+    fig.update_xaxes(
+        tickfont=dict(
+            # Adjust this value to make ticks smaller (e.g., 8, 10, 12)
+            size=10
+        ),
+        categoryorder='array',
+        categoryarray=df_last['Game_Label']
+    )
+    fig.update_yaxes(
+        tickfont=dict(
+            # Adjust this value to make ticks smaller (e.g., 8, 10, 12)
+            size=10
+        )
+    )
 
-    # Print hit/push rates
-    print(f"Hit Rate: {hit_percent:.2f}% ({hits}/{last_games_count})")
-    print(f"Push Rate: {push_percent:.2f}% ({pushes}/{last_games_count})")
+    utils = Utils()
+    output_html_path = utils.get_plots_folder(
+    ) + f'/{player_name.replace(' ', '')}_{prop_line}_{stat}_plot.html'
 
-    # graph
-    bars = plt.bar(df_last['Date'].dt.strftime('%Y-%m-%d') + ' ' + df_last['Opponent'],
-                   df_last[stat], color=colors)
-    for bar in bars:
-        yval = bar.get_height()
-        if yval > 0:
-            plt.text(bar.get_x() + bar.get_width() / 2, yval + 0.5,
-                     f'{float(yval)}', ha='center', va='bottom', fontsize=9)
+    # Show the plot
+    # auto_open=False here means we'll open it manually below
+    fig.write_html(output_html_path, auto_open=False)
 
-    # Prop line
-    plt.axhline(prop_line, color='black', linestyle='--',
-                label=f'Prop Line: {prop_line}')
-
-    # Labels and title
-    plt.xlabel('Game Date')
-    plt.ylabel(stat)
-    plt.title(f'{player_name} {stat} line')
-    plt.xticks(rotation=75)
-    plt.legend()
-    plt.tight_layout()
-
-    # Adjust y-axis to give space for bar labels
-    max_val = df_last[stat].max()
-    # Add buffer space above tallest bar or prop line
-    plt.ylim(top=max(max_val, prop_line) * 1.1)
-
-    plt.show()
+    # Open the HTML file in the default web browser
+    webbrowser.open_new_tab(output_html_path)
+    print(f"Interactive plot opened in your browser: {output_html_path}")
