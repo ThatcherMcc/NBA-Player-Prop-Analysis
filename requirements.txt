@@ -1,6 +1,6 @@
 pandas
 requests
 beautifulsoup4
-matplotlib
+plotly
 cloudscraper
 lxml
