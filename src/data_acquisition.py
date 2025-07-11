@@ -13,7 +13,7 @@ import pandas as pd
 from io import StringIO
 import random
 import os
-from utils import get_root_path
+from utils import Utils
 
 
 class DataNotFoundError(Exception):
@@ -35,6 +35,7 @@ def get_player_gamelog(full_name: str, url_start: str = 'https://www.basketball-
     """
 
     scraper = cloudscraper.create_scraper()
+    utils = Utils()
     # current season year (NEEDS TO BE CHANGED TO ALWAYS BE THE CURRENT YEAR)
     year = 2025
 
@@ -70,12 +71,8 @@ def get_player_gamelog(full_name: str, url_start: str = 'https://www.basketball-
         # raises any errors
         response.raise_for_status()
 
-        project_root = get_root_path()
-        # Construct the correct file path using os.path.join
-        # This will ensure the file goes into ROOT/data/gameLogs/
-        file_path = os.path.join(
-            project_root, 'data', 'gamelogs', f"{player_name}_{year}_gamelog.html")
-
+        file_path = utils.get_gamelogs_folder() + \
+            f'/{player_name}_2025_gamelog.html'
         with open(file_path, "w+", encoding="utf-8") as f:
             # writes/overwrites file
             f.write(response.text)

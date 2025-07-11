@@ -1,6 +1,6 @@
 from data_acquisition import get_player_gamelog, DataNotFoundError
 from data_processing import clean_gamelog
-from utils import create_gamelogs_directory, get_root_path
+from utils import Utils
 from analysis import graph_dataframe
 import os
 
@@ -8,7 +8,7 @@ import os
 def main():
 
     # create the needed 'data' directory and itssub directories
-    create_gamelogs_directory()
+    utils = Utils()
 
     # repeats for entire proccess if prompted by user
     while True:
@@ -60,9 +60,8 @@ def main():
             print("Cleaning process returned a null DataFrame.")
             exit()
 
-        root_path = get_root_path()
-        file_path = os.path.join(root_path, 'data', 'dataframes',
-                                 f'{full_name.replace(' ', '_')}_2025_dataframe.html')
+        file_path = utils.get_dataframes_folder(
+        ) + f'/{full_name.replace(' ', '_')}_2025_dataframe.html'
         # saves clean dataframe
         cleaned_df.to_html(file_path, index=False, encoding="utf-8")
 
@@ -74,18 +73,18 @@ def main():
                 stat = input("Enter a stat (e.g. 'PRA' or 'TRB'): ")
                 prop_line = float(input("Enter the prop line: "))
                 games_count = int(input("How many games should shown: "))
+
+                # Graph the correct inputs
+                graph_dataframe(cleaned_df, name, prop_line, stat, games_count)
+
                 break
 
             except Exception as e:
                 print(f"an error has occured: {e}")
 
-        # Graph the correct inputs
-        graph_dataframe(cleaned_df, name, prop_line, stat, games_count)
-
         answer = input("Want to look up another player?: ")
         if answer.lower() != 'yes':
             break
-        continue
 
 
 if __name__ == "__main__":
