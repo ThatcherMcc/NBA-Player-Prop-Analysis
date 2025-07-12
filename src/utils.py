@@ -13,6 +13,18 @@ class Utils():
         self.create_all_directories()
         pass
 
+    def get_names_df_path(self):
+        dataframes_folder = self.get_dataframes_folder()
+        names_df_path = os.path.join(
+            dataframes_folder, "2025_player_names_copy.csv")
+        return names_df_path
+
+    def get_database_path(self):
+        database_folder = self.get_database_folder()
+        database_path = os.path.join(
+            database_folder, "player_data.db")
+        return database_path
+
     def get_root_path(self):
         """
         Finds the absolute path to the project's root directory.
