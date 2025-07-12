@@ -30,8 +30,8 @@ def graph_dataframe(df: pd.DataFrame, player_name: str, prop_line: float, stat: 
     df_last = df_last.tail(last_games_count)
     df_last[stat] = pd.to_numeric(df_last[stat], errors='coerce').fillna(0)
 
-    df_last['Game_Label'] = df_last['Opponent'] + '<br>' + \
-        df_last['Date'].dt.strftime('%m/%d/%y')  # <br> for newline in Plotly
+    df_last['Game_Label'] = df_last['OPPONENT'] + '<br>' + \
+        df_last['DATE'].dt.strftime('%m/%d/%y')  # <br> for newline in Plotly
     df_last['Outcome'] = ['Over' if s > prop_line else 'Under' if s <
                           prop_line else 'Push' for s in df_last[stat]]
 

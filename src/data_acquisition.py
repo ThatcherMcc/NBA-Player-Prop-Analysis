@@ -39,17 +39,17 @@ def get_player_gamelog(full_name: str, url_start: str = 'https://www.basketball-
     # current season year (NEEDS TO BE CHANGED TO ALWAYS BE THE CURRENT YEAR)
     year = 2025
 
-    full_name = full_name.strip()  # strips input name
+    full_name = full_name.strip()  # strips input name 'Lebron James'
     # split the name into first and last name
-    split_name = full_name.split(' ')
+    split_name = full_name.split(' ')  # ['Lebron', 'James']
 
     # raise an error if there isn't 2 distinct names
     if len(split_name) != 2:
         raise ValueError(
             "Please enter both first and last name. Make sure to include any '-' !")
 
-    first_name = split_name[0]
-    last_name = split_name[1]
+    first_name = split_name[0]  # 'Lebron'
+    last_name = split_name[1]  # 'James'
 
     # if last name is 5+ letters, only use the first 5
     if len(last_name) >= 5:

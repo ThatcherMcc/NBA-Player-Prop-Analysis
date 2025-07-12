@@ -22,15 +22,14 @@ def main():
                 # get name of player from user
                 full_name = input(
                     "Enter player's full name (e.g. 'Lebron James'): ")
-                name = full_name.lower()
 
                 # use 'end' to stop program
-                if name.lower() == "end":
+                if full_name.lower() == "end":
                     print("Ending now.")
                     exit()
 
                 # attempt to scrape dataframe from webpage
-                gamelog_df = get_player_gamelog(name)
+                gamelog_df = get_player_gamelog(full_name)
 
                 print(gamelog_df)
                 break
@@ -61,9 +60,9 @@ def main():
             exit()
 
         file_path = utils.get_dataframes_folder(
-        ) + f'/{full_name.replace(' ', '_')}_2025_dataframe.html'
+        ) + f'/{full_name.replace(' ', '_')}_2025_dataframe.csv'
         # saves clean dataframe
-        cleaned_df.to_html(file_path, index=False, encoding="utf-8")
+        cleaned_df.to_csv(file_path, index=False, encoding="utf-8")
 
         # repeats for incorrect gamelog inputs
         while True:
