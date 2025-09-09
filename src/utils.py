@@ -16,7 +16,7 @@ class Utils():
     def get_names_df_path(self):
         dataframes_folder = self.get_dataframes_folder()
         names_df_path = os.path.join(
-            dataframes_folder, "2025_player_names_copy.csv")
+            dataframes_folder, "2025_player_names.csv")
         return names_df_path
 
     def get_database_path(self):
