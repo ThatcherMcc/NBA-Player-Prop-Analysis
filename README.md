@@ -1,5 +1,9 @@
 # NBA Player Analysis Repository
 
+[Short Demo Video on YouTube](https://www.youtube.com/watch?v=sQPV7yabL-g&ab_channel=YeetleBandeetle)
+
+[![Off World Game Short Demo](https://img.youtube.com/vi/sQPV7yabL-g/hqdefault.jpg)](https://www.youtube.com/watch?v=sQPV7yabL-g)
+
 ## Overview
 
 This repository is a Python-based project dedicated to acquiring, cleaning, and preparing NBA player data for in-depth analysis, with a primary focus on applications for player prop bet analysis. It provides a structured approach to web scraping, data normalization, and organized storage of player statistics.
